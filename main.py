@@ -7,6 +7,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 API_KEY = 'api'
 
+print("123")
 @bot.event
 async def on_ready():
     await bot.tree.sync()
