@@ -1,23 +1,27 @@
 import requests
 import discord
+from discord import app_commands
 from discord.ext import commands
-
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
-API_KEY = 'апи'
+bot = commands.Bot(command_prefix='/', intents=intents)
+API_KEY = 'api'
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
+@bot.event
+async def on_ready():
+    await bot.tree.sync()
+    print(f'Мы вошли как {bot.user}!')
 
+@bot.tree.command(name="ping")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message('pong')
 
-@bot.command()
-async def weather(ctx):
+@bot.tree.command(name="weather")
+async def weather(interaction: discord.Interaction):
     role_id = 1443444045966737428
-    role = ctx.guild.get_role(role_id)
+    role = interaction.guild.get_role(role_id)
 
-    if role in ctx.author.roles:
+    if role in interaction.user.roles:
         city = "Петропавловск-Камчатский"
         url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=ru'
 
@@ -30,26 +34,33 @@ async def weather(ctx):
             humidity = data["main"]["humidity"]
             wind_speed = data["wind"]["speed"]
 
-            await ctx.send(f"Вот актуальная погода в {city}:")
-            await ctx.send(f"Температура: {temp}°C\n"
-                           f"Описание: {weather_description}\n"
-                           f"Влажность: {humidity}%\n"
-                           f"Скорость ветра: {wind_speed} м/с")
+            # Вместо нескольких send_message, объединим все в один
+            weather_message = (f"Вот актуальная погода в {city}:\n"
+                               f"Температура: {temp}°C\n"
+                               f"Описание: {weather_description}\n"
+                               f"Влажность: {humidity}%\n"
+                               f"Скорость ветра: {wind_speed} м/с")
+
+            await interaction.response.send_message(weather_message)
         else:
-            await ctx.send("Не удалось получить данные о погоде.")
+            await interaction.response.send_message("Не удалось получить данные о погоде.")
     else:
-        await ctx.send("У вас нет этой роли.")
+        await interaction.response.send_message("У вас нет этой роли.")
 
-@bot.command()
-async def checkrole(ctx):
+
+@bot.tree.command(name="checkrole")
+async def checkrole(interaction: discord.Interaction):
     role_id = 1443444045966737428
+    role = interaction.guild.get_role(role_id)
 
-    role = ctx.guild.get_role(role_id)
-
-    if role in ctx.author.roles:
-        await ctx.send(F"Окей Я рад что у вас есть роль {role}")
-        await ctx.send("Вот картинка:", file=discord.File("avarter.png"))
+    if role in interaction.user.roles:
+        # Создаем сообщение с картинкой в одном ответе
+        await interaction.response.send_message(
+            f"Окей Я рад что у вас есть роль {role}\nВот картинка:",
+            file=discord.File("avarter.png")
+        )
     else:
-        await ctx.send("У вас нет этой роли.")
+        await interaction.response.send_message("У вас нет этой роли.")
 
-bot.run('токен')
+
+bot.run('token')
