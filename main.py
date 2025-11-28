@@ -9,9 +9,22 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def ping(ctx):
     await ctx.send('pong')
 
+
+@bot.command()
+async def whtweather(ctx):
+    role_id = 1443444045966737428
+
+    role = ctx.guild.get_role(role_id)
+
+    if role in ctx.author.roles:
+        await ctx.send(F"Окей Я рад что у вас есть роль {role}")
+        await ctx.send("Вот актуальная погода:  В РАЗРАБОТКЕ")
+    else:
+        await ctx.send("У вас нет этой роли.")
+
 @bot.command()
 async def checkrole(ctx):
-    role_id = "айди роли"
+    role_id = 1443444045966737428
 
     role = ctx.guild.get_role(role_id)
 
@@ -21,4 +34,4 @@ async def checkrole(ctx):
     else:
         await ctx.send("У вас нет этой роли.")
 
-bot.run('токен')
+bot.run('token')
